@@ -76,8 +76,47 @@ BVHBuildNode* BVHAccel::recursiveBuild(std::vector<Object*> objects)
         }
 
         auto beginning = objects.begin();
-        auto middling = objects.begin() + (objects.size() / 2);
         auto ending = objects.end();
+
+        int bestSplit = objects.size() / 2;
+
+        if (splitMethod == SplitMethod::SAH)
+        {
+            float minCost = std::numeric_limits<float>::infinity();
+
+            for (int i = 1; i < objects.size(); ++i)
+            {
+                Bounds3 leftBounds;
+                Bounds3 rightBounds;
+
+                for (int j = 0; j < i; ++j)
+                {
+                    leftBounds = Union(leftBounds, objects[j]->getBounds());
+                }
+
+                for (int j = i; j < objects.size(); ++j)
+                {
+                    rightBounds = Union(rightBounds, objects[j]->getBounds());
+                }
+
+                float leftArea = leftBounds.SurfaceArea();
+                float rightArea = rightBounds.SurfaceArea();
+                float parentArea = bounds.SurfaceArea();
+
+                float cost =
+                    1.0f +
+                    (leftArea / parentArea) * i +
+                    (rightArea / parentArea) * (objects.size() - i);
+
+                if (cost < minCost)
+                {
+                    minCost = cost;
+                    bestSplit = i;
+                }
+            }
+        }
+
+        auto middling = objects.begin() + bestSplit;
 
         auto leftshapes = std::vector<Object*>(beginning, middling);
         auto rightshapes = std::vector<Object*>(middling, ending);
