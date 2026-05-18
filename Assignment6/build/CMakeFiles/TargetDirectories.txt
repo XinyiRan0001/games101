@@ -1,3 +1,0 @@
-C:/Users/yesta/Portfolio/games101/Assignment6/build/CMakeFiles/RayTracing.dir
-C:/Users/yesta/Portfolio/games101/Assignment6/build/CMakeFiles/ALL_BUILD.dir
-C:/Users/yesta/Portfolio/games101/Assignment6/build/CMakeFiles/ZERO_CHECK.dir
