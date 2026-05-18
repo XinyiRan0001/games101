@@ -157,14 +157,14 @@ The SAH implementation achieved faster rendering performance compared to the nai
 # Rendering Results
 
 ## NAIVE BVH
-
+![binary](images/binary.png)
 ![NAIVE BVH](images/NAIVE_BVH.png)
 
 ---
 
 ## SAH BVH
-
-![SAH BVH](images/SAH.png)
+![SAH](images/SAH.png)
+![SAH BVH](images/SAH_BVH.png)
 
 ---
 
