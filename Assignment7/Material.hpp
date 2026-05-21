@@ -159,20 +159,54 @@ float Material::pdf(const Vector3f &wi, const Vector3f &wo, const Vector3f &N){
     }
 }
 
-Vector3f Material::eval(const Vector3f &wi, const Vector3f &wo, const Vector3f &N){
-    switch(m_type){
-        case DIFFUSE:
-        {
-            // calculate the contribution of diffuse   model
-            float cosalpha = dotProduct(N, wo);
-            if (cosalpha > 0.0f) {
-                Vector3f diffuse = Kd / M_PI;
-                return diffuse;
-            }
-            else
-                return Vector3f(0.0f);
-            break;
-        }
+Vector3f Material::eval(const Vector3f& wi, const Vector3f& wo, const Vector3f& N)
+{
+    switch (m_type)
+    {
+    case DIFFUSE:
+    {
+        float cos_o = dotProduct(N, wo);
+        float cos_i = dotProduct(N, wi);
+
+        if (cos_o <= 0.0f || cos_i <= 0.0f)
+            return Vector3f(0.0f);
+
+        Vector3f n = normalize(N);
+        Vector3f v = normalize(wi);
+        Vector3f l = normalize(wo);
+        Vector3f h = normalize(v + l);
+
+        float NdotL = std::max(0.0f, dotProduct(n, l));
+        float NdotV = std::max(0.0f, dotProduct(n, v));
+        float NdotH = std::max(0.0f, dotProduct(n, h));
+        float VdotH = std::max(0.0f, dotProduct(v, h));
+
+        float roughness = 0.35f;
+        float alpha = roughness * roughness;
+        float alpha2 = alpha * alpha;
+
+        float denom = NdotH * NdotH * (alpha2 - 1.0f) + 1.0f;
+        float D = alpha2 / (M_PI * denom * denom + EPSILON);
+
+        float r = roughness + 1.0f;
+        float k = (r * r) / 8.0f;
+
+        float G_V = NdotV / (NdotV * (1.0f - k) + k + EPSILON);
+        float G_L = NdotL / (NdotL * (1.0f - k) + k + EPSILON);
+        float G = G_V * G_L;
+
+        Vector3f F0(0.04f);
+        F0 = F0 * 0.1f + Ks * 0.9f;
+
+        Vector3f F = F0 + (Vector3f(1.0f) - F0) * std::pow(1.0f - VdotH, 5.0f);
+
+        Vector3f specular = F * D * G / (4.0f * NdotV * NdotL + EPSILON);
+        Vector3f diffuse = Kd / M_PI;
+
+        return diffuse + specular;
+    }
+    default:
+        return Vector3f(0.0f);
     }
 }
 
